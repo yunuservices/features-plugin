@@ -1,0 +1,22 @@
+name: features
+version: ${version}
+main: io.yunuservices.features.PaperFeaturesPlugin
+api-version: '1.21'
+authors:
+  - yunuservices
+folia-supported: true
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    MiniPlaceholders:
+      load: BEFORE
+      required: false
+      join-classpath: true
+permissions:
+  features.tags.admin:
+    default: op
+  features.tags.generate:
+    default: op
