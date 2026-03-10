@@ -7,7 +7,7 @@ Features is a multi-platform Minecraft plugin for MOTD and in-game customization
 > MOTD image rendering in this plugin is only intended for clients in the `1.21.9` to `1.21.11` protocol range.
 > The Paper and Folia tag system is still supported and requires `1.21.9+`.
 
-## What It Includes
+## What It Includes?
 
 - Paper and Folia image tag generation backed by MineSkin
 - Paper PlaceholderAPI and MiniPlaceholders integration
@@ -17,7 +17,7 @@ Features is a multi-platform Minecraft plugin for MOTD and in-game customization
 
 ## Modules
 
-- `core` shared runtime, rendering, config, image, and MineSkin code
+- `core` shared runtime, rendering, config, image and MineSkin code
 - `paper` Paper and Folia plugin module
 - `velocity` Velocity plugin module
 
