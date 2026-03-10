@@ -65,6 +65,17 @@ Velocity:
 - Cache files: `plugins/features/image-cache.yml`, `plugins/features/sprite-cache.yml`
 - **MOTD image rendering is intended for protocol range `1.21.9` through `1.21.11`; other clients fall back to text**
 
+## Permissions
+
+Paper & Folia:
+
+- `features.tags.admin` for tag management commands such as reload, rename, and delete
+- `features.tags.generate` for `/tags generate`
+
+Velocity:
+
+- `features.admin` for `/features reload`
+
 ## Placeholder Support
 
 Paper and Folia can expose generated tags through optional integrations.
