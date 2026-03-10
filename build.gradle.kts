@@ -10,6 +10,7 @@ extra["paperApiVersion"] = "1.21.11-R0.1-20260310.030221-86"
 extra["velocityApiVersion"] = "3.5.0-20260308.200400-12"
 extra["velocityBrigadierVersion"] = "1.0.0-20210613.082804-10"
 extra["mineSkinClientVersion"] = "3.2.1-20251007.124020-2"
+extra["packetEventsVersion"] = "2.11.2"
 
 dependencies {
     implementation(project(":paper"))
@@ -24,6 +25,7 @@ allprojects {
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://repo.codemc.io/repository/maven-releases/")
         maven("https://repo.inventivetalent.org/repository/public/")
         maven("https://repo.extendedclip.com/releases/")
     }

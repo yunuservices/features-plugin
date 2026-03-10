@@ -134,21 +134,34 @@ final class PaperMotdSupport implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onServerListPing(PaperServerListPingEvent event) {
-        if (config == null || !config.isEnabled()) {
+        Component description = resolveDescriptionForProtocol(event.getProtocolVersion());
+        if (description == null) {
             return;
+        }
+        event.motd(description);
+    }
+
+    boolean isEnabled() {
+        PaperMotdConfig currentConfig = config;
+        return currentConfig != null && currentConfig.isEnabled();
+    }
+
+    Component resolveDescriptionForProtocol(int protocolVersion) {
+        PaperMotdConfig currentConfig = config;
+        if (currentConfig == null || !currentConfig.isEnabled()) {
+            return null;
         }
 
         boolean supportsSpriteMotd = MotdProtocolSupport.supportsSpriteMotd(
-            event.getProtocolVersion(),
-            config.getProtocolRange().getMin(),
-            config.getProtocolRange().getMax()
+            protocolVersion,
+            currentConfig.getProtocolRange().getMin(),
+            currentConfig.getProtocolRange().getMax()
         );
         RuntimeMotd motd = chooseMotd(supportsSpriteMotd);
         if (motd == null) {
-            return;
+            return null;
         }
-
-        event.motd(motd.resolveDescription(supportsSpriteMotd));
+        return motd.resolveDescription(supportsSpriteMotd);
     }
 
     private Logger logger() {

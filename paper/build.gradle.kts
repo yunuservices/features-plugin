@@ -11,6 +11,7 @@ dependencies {
 
     compileOnly("io.papermc.paper:paper-api:${rootProject.extra["paperApiVersion"]}")
     compileOnly("com.mojang:brigadier:1.3.10")
+    compileOnly("com.github.retrooper:packetevents-spigot:${rootProject.extra["packetEventsVersion"]}")
     compileOnly("me.clip:placeholderapi:2.12.2")
     compileOnly("io.github.miniplaceholders:miniplaceholders-api:3.1.0")
     annotationProcessor("org.incendo:cloud-annotations:2.0.0")

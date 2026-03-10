@@ -52,6 +52,7 @@ public class PaperFeaturesPlugin extends JavaPlugin {
     private LegacyPaperCommandManager<CommandSender> commandManager;
     private Runnable placeholderApiClose = () -> {};
     private Runnable miniPlaceholdersClose = () -> {};
+    private Runnable packetEventsMotdClose = () -> {};
 
     private MiniMessage miniMessage;
 
@@ -75,6 +76,7 @@ public class PaperFeaturesPlugin extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(paperMotdSupport, this);
 
+        maybeRegisterPacketEventsMotdBridge();
         maybeRegisterPlaceholderExpansion();
         maybeRegisterMiniPlaceholders();
         getLogger().info("features enabled.");
@@ -87,6 +89,8 @@ public class PaperFeaturesPlugin extends JavaPlugin {
         placeholderApiClose = () -> {};
         miniPlaceholdersClose.run();
         miniPlaceholdersClose = () -> {};
+        packetEventsMotdClose.run();
+        packetEventsMotdClose = () -> {};
     }
 
     private void bootstrapFiles() throws IOException {
@@ -175,6 +179,26 @@ public class PaperFeaturesPlugin extends JavaPlugin {
         } catch (Throwable t) {
             miniPlaceholdersClose = () -> {};
             getLogger().log(Level.WARNING, "Failed to register MiniPlaceholders expansion", t);
+        }
+    }
+
+    private void maybeRegisterPacketEventsMotdBridge() {
+        Plugin packetEvents = Bukkit.getPluginManager().getPlugin("packetevents");
+        if (packetEvents == null || !packetEvents.isEnabled()) {
+            if (paperMotdSupport.isEnabled()) {
+                getLogger().warning(
+                    "PacketEvents was not found. Paper join-time MOTD refresh will be unavailable until PacketEvents is installed."
+                );
+            }
+            return;
+        }
+
+        try {
+            packetEventsMotdClose = PaperPacketEventsMotdBridge.register(this, paperMotdSupport);
+            getLogger().info("PacketEvents MOTD refresh bridge enabled.");
+        } catch (Throwable t) {
+            packetEventsMotdClose = () -> {};
+            getLogger().log(Level.WARNING, "Failed to enable PacketEvents MOTD refresh bridge", t);
         }
     }
 
