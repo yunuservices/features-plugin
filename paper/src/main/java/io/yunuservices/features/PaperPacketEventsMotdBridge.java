@@ -1,75 +1,54 @@
 package io.yunuservices.features;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.PacketEventsAPI;
-import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerCommon;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerServerData;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.util.CachedServerIcon;
 
 import java.util.logging.Level;
 
-final class PaperPacketEventsMotdBridge implements Listener {
+final class PaperPacketEventsMotdBridge extends PacketListenerAbstract {
     private final PaperFeaturesPlugin plugin;
     private final PaperMotdSupport paperMotdSupport;
 
     private PaperPacketEventsMotdBridge(PaperFeaturesPlugin plugin, PaperMotdSupport paperMotdSupport) {
+        super(PacketListenerPriority.HIGH);
         this.plugin = plugin;
         this.paperMotdSupport = paperMotdSupport;
     }
 
     static Runnable register(PaperFeaturesPlugin plugin, PaperMotdSupport paperMotdSupport) {
         PaperPacketEventsMotdBridge bridge = new PaperPacketEventsMotdBridge(plugin, paperMotdSupport);
-        Bukkit.getPluginManager().registerEvents(bridge, plugin);
-        return () -> HandlerList.unregisterAll(bridge);
+        PacketListenerCommon registered = PacketEvents.getAPI().getEventManager().registerListener(bridge);
+        return () -> PacketEvents.getAPI().getEventManager().unregisterListener(registered);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        player.getScheduler().runDelayed(plugin, task -> sendServerData(player), () -> {}, 1L);
-    }
-
-    private void sendServerData(Player player) {
-        if (!player.isOnline()) {
+    @Override
+    public void onPacketSend(PacketSendEvent event) {
+        if (event.getPacketType() != PacketType.Play.Server.SERVER_DATA) {
             return;
         }
 
         try {
-            PacketEventsAPI<?> api = PacketEvents.getAPI();
-            if (api == null) {
+            if (event.getUser() == null || event.getUser().getClientVersion() == null) {
                 return;
             }
 
-            ClientVersion clientVersion = api.getPlayerManager().getClientVersion(player);
-            if (clientVersion == null) {
-                return;
-            }
-
-            Component description = paperMotdSupport.resolveDescriptionForProtocol(clientVersion.getProtocolVersion());
+            Component description = paperMotdSupport.resolveDescriptionForProtocol(
+                event.getUser().getClientVersion().getProtocolVersion()
+            );
             if (description == null) {
                 return;
             }
 
-            CachedServerIcon serverIcon = Bukkit.getServerIcon();
-            String iconData = serverIcon == null || serverIcon.isEmpty() ? null : serverIcon.getData();
-
-            WrapperPlayServerServerData packet = new WrapperPlayServerServerData(
-                description,
-                iconData,
-                false,
-                Bukkit.isEnforcingSecureProfiles()
-            );
-            api.getPlayerManager().sendPacket(player, packet);
+            WrapperPlayServerServerData packet = new WrapperPlayServerServerData(event);
+            packet.setMOTD(description);
         } catch (Throwable t) {
-            plugin.getLogger().log(Level.WARNING, "Failed to send join-time MOTD refresh to " + player.getName(), t);
+            plugin.getLogger().log(Level.WARNING, "Failed to rewrite outgoing SERVER_DATA packet", t);
         }
     }
 }
