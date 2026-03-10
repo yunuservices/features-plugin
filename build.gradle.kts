@@ -18,6 +18,8 @@ dependencies {
 
 allprojects {
     apply(plugin = "java")
+    group = rootProject.group
+    version = rootProject.version
 
     repositories {
         mavenCentral()
@@ -46,7 +48,8 @@ tasks {
     shadowJar {
         archiveClassifier.set("")
         archiveBaseName.set("features")
-        archiveVersion.set("")
+        archiveVersion.set(project.version.toString())
+        archiveFileName.set("features-${project.version}.jar")
         duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
         relocate("com.fasterxml.jackson", "io.yunuservices.features.libs.jackson")
         relocate("org.yaml.snakeyaml", "io.yunuservices.features.libs.snakeyaml")

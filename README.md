@@ -42,11 +42,11 @@ Windows:
 
 ## Artifacts
 
-- `build/libs/features.jar`
-- `paper/build/libs/features-paper.jar`
-- `velocity/build/libs/features-velocity.jar`
+- `build/libs/features-1.0.0.jar`
+- `paper/build/libs/features-paper-1.0.0.jar`
+- `velocity/build/libs/features-velocity-1.0.0.jar`
 
-`features.jar` is the combined distribution. The platform-specific jars are also produced for targeted deployments.
+`features-1.0.0.jar` is the combined distribution. The platform-specific jars are also produced for targeted deployments.
 
 ## Overview
 

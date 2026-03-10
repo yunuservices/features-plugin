@@ -31,6 +31,8 @@ tasks {
     shadowJar {
         archiveClassifier.set("")
         archiveBaseName.set("features-paper")
+        archiveVersion.set(project.version.toString())
+        archiveFileName.set("features-paper-${project.version}.jar")
         relocate("com.fasterxml.jackson", "io.yunuservices.features.libs.jackson")
         relocate("org.yaml.snakeyaml", "io.yunuservices.features.libs.snakeyaml")
         relocate("org.mineskin", "io.yunuservices.features.libs.mineskin")
