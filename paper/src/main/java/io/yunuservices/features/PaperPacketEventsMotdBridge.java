@@ -7,7 +7,10 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerServerData;
+import com.github.retrooper.packetevents.wrapper.status.server.WrapperStatusServerResponse;
+import com.google.gson.JsonObject;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 import java.util.logging.Level;
 
@@ -29,15 +32,11 @@ final class PaperPacketEventsMotdBridge extends PacketListenerAbstract {
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
-        if (event.getPacketType() != PacketType.Play.Server.SERVER_DATA) {
+        if (event.getUser() == null || event.getUser().getClientVersion() == null) {
             return;
         }
 
         try {
-            if (event.getUser() == null || event.getUser().getClientVersion() == null) {
-                return;
-            }
-
             Component description = paperMotdSupport.resolveDescriptionForProtocol(
                 event.getUser().getClientVersion().getProtocolVersion()
             );
@@ -45,10 +44,27 @@ final class PaperPacketEventsMotdBridge extends PacketListenerAbstract {
                 return;
             }
 
-            WrapperPlayServerServerData packet = new WrapperPlayServerServerData(event);
-            packet.setMOTD(description);
+            if (event.getPacketType() == PacketType.Status.Server.RESPONSE) {
+                rewriteStatusResponse(event, description);
+                return;
+            }
+
+            if (event.getPacketType() == PacketType.Play.Server.SERVER_DATA) {
+                WrapperPlayServerServerData packet = new WrapperPlayServerServerData(event);
+                packet.setMOTD(description);
+            }
         } catch (Throwable t) {
-            plugin.getLogger().log(Level.WARNING, "Failed to rewrite outgoing SERVER_DATA packet", t);
+            plugin.getLogger().log(Level.WARNING, "Failed to rewrite outgoing MOTD packet", t);
         }
+    }
+
+    private void rewriteStatusResponse(PacketSendEvent event, Component description) {
+        WrapperStatusServerResponse packet = new WrapperStatusServerResponse(event);
+        JsonObject response = packet.getComponent();
+        if (response == null) {
+            return;
+        }
+        response.add("description", GsonComponentSerializer.gson().serializeToTree(description));
+        packet.setComponent(response);
     }
 }

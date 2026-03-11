@@ -185,9 +185,10 @@ public class PaperFeaturesPlugin extends JavaPlugin {
     private void maybeRegisterPacketEventsMotdBridge() {
         Plugin packetEvents = Bukkit.getPluginManager().getPlugin("packetevents");
         if (packetEvents == null || !packetEvents.isEnabled()) {
+            paperMotdSupport.setPacketEventsStatusOverrideEnabled(false);
             if (paperMotdSupport.isEnabled()) {
                 getLogger().warning(
-                    "PacketEvents was not found. Paper join-time MOTD refresh will be unavailable until PacketEvents is installed."
+                    "PacketEvents was not found. Paper packet-based MOTD refresh will be unavailable until PacketEvents is installed."
                 );
             }
             return;
@@ -195,9 +196,11 @@ public class PaperFeaturesPlugin extends JavaPlugin {
 
         try {
             packetEventsMotdClose = PaperPacketEventsMotdBridge.register(this, paperMotdSupport);
-            getLogger().info("PacketEvents MOTD refresh bridge enabled.");
+            paperMotdSupport.setPacketEventsStatusOverrideEnabled(true);
+            getLogger().info("PacketEvents MOTD packet bridge enabled.");
         } catch (Throwable t) {
             packetEventsMotdClose = () -> {};
+            paperMotdSupport.setPacketEventsStatusOverrideEnabled(false);
             getLogger().log(Level.WARNING, "Failed to enable PacketEvents MOTD refresh bridge", t);
         }
     }

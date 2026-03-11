@@ -9,6 +9,7 @@ dependencies {
     implementation("org.incendo:cloud-annotations:2.0.0")
     implementation("org.jspecify:jspecify:1.0.0")
 
+    compileOnly("net.kyori:adventure-text-serializer-gson:4.26.1")
     compileOnly("io.papermc.paper:paper-api:${rootProject.extra["paperApiVersion"]}")
     compileOnly("com.mojang:brigadier:1.3.10")
     compileOnly("com.github.retrooper:packetevents-spigot:${rootProject.extra["packetEventsVersion"]}")
@@ -19,6 +20,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("net.kyori:adventure-text-serializer-gson:4.26.1")
     testImplementation("io.papermc.paper:paper-api:${rootProject.extra["paperApiVersion"]}")
     testImplementation("io.github.miniplaceholders:miniplaceholders-api:3.1.0")
 }

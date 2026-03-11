@@ -25,7 +25,7 @@ Features is a multi-platform Minecraft plugin for MOTD and in-game customization
 
 - JDK 21
 - Internet access to the configured Maven repositories on the first build
-- PacketEvents `2.11.2+` on Paper or Folia if you use the standalone MOTD feature
+- PacketEvents `2.11.2+` on Paper or Folia if you use the standalone MOTD feature with protocol-aware status packet rewriting
 
 ## Build
 
@@ -57,7 +57,7 @@ Paper and Folia:
 - Primary config files: `plugins/features/settings.yml`, `plugins/features/tags.yml`
 - Import directory: `plugins/features/import/`
 - Optional MOTD files: `plugins/features/config.yml`, `plugins/features/image-cache.yml`, `plugins/features/sprite-cache.yml`
-- External dependency for join-time MOTD refresh: `PacketEvents`
+- External dependency for status and server-data MOTD packet rewriting: `PacketEvents`
 - **MOTD image rendering is intended for protocol range `1.21.9` through `1.21.11`; other clients fall back to text**
 
 Velocity:

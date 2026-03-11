@@ -63,6 +63,7 @@ final class PaperMotdSupport implements Listener {
     private final List<RuntimeMotd> runtimeMotds = new CopyOnWriteArrayList<>();
     private volatile List<RuntimeMotd> spriteRuntimeMotds = List.of();
     private volatile List<RuntimeMotd> textRuntimeMotds = List.of();
+    private volatile boolean packetEventsStatusOverrideEnabled;
 
     PaperMotdSupport(PaperFeaturesPlugin plugin, YamlStore yamlStore) {
         this.plugin = plugin;
@@ -134,6 +135,9 @@ final class PaperMotdSupport implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onServerListPing(PaperServerListPingEvent event) {
+        if (packetEventsStatusOverrideEnabled) {
+            return;
+        }
         Component description = resolveDescriptionForProtocol(event.getProtocolVersion());
         if (description == null) {
             return;
@@ -144,6 +148,10 @@ final class PaperMotdSupport implements Listener {
     boolean isEnabled() {
         PaperMotdConfig currentConfig = config;
         return currentConfig != null && currentConfig.isEnabled();
+    }
+
+    void setPacketEventsStatusOverrideEnabled(boolean enabled) {
+        this.packetEventsStatusOverrideEnabled = enabled;
     }
 
     Component resolveDescriptionForProtocol(int protocolVersion) {
