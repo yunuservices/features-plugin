@@ -12,13 +12,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
-import org.incendo.cloud.paper.LegacyPaperCommandManager;
+import org.incendo.cloud.paper.PaperCommandManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,7 +49,7 @@ public class PaperFeaturesPlugin extends JavaPlugin {
     private TagStorage tagStorage;
     private MineSkinUploadService mineSkinUploadService;
     private TagsCommand tagsCommand;
-    private LegacyPaperCommandManager<CommandSender> commandManager;
+    private PaperCommandManager<CommandSourceStack> commandManager;
     private Runnable placeholderApiClose = () -> {};
     private Runnable miniPlaceholdersClose = () -> {};
     private Runnable packetEventsMotdClose = () -> {};
@@ -309,11 +309,11 @@ public class PaperFeaturesPlugin extends JavaPlugin {
 
     private void registerCommands() throws Exception {
         this.tagsCommand = new TagsCommand(this);
-        this.commandManager = LegacyPaperCommandManager.createNative(this, ExecutionCoordinator.simpleCoordinator());
-        this.commandManager.registerBrigadier();
-        this.commandManager.registerAsynchronousCompletions();
+        this.commandManager = PaperCommandManager.builder()
+            .executionCoordinator(ExecutionCoordinator.simpleCoordinator())
+            .buildOnEnable(this);
 
-        AnnotationParser<CommandSender> parser = new AnnotationParser<>(commandManager, CommandSender.class);
+        AnnotationParser<CommandSourceStack> parser = new AnnotationParser<>(commandManager, CommandSourceStack.class);
         parser.parse(new PaperAnnotatedCommands(tagsCommand));
     }
 
