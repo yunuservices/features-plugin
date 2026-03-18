@@ -9,12 +9,16 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerServerData;
 import com.github.retrooper.packetevents.wrapper.status.server.WrapperStatusServerResponse;
 import com.google.gson.JsonObject;
+import io.yunuservices.features.core.protocol.StatusDescriptionLimiter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 import java.util.logging.Level;
 
 final class PaperPacketEventsMotdBridge extends PacketListenerAbstract {
+    private static final GsonComponentSerializer GSON = GsonComponentSerializer.gson();
+    private static final Component SAFE_STATUS_FALLBACK = Component.text("Welcome to the server");
+
     private final PaperFeaturesPlugin plugin;
     private final PaperMotdSupport paperMotdSupport;
 
@@ -64,7 +68,15 @@ final class PaperPacketEventsMotdBridge extends PacketListenerAbstract {
         if (response == null) {
             return;
         }
-        response.add("description", GsonComponentSerializer.gson().serializeToTree(description));
-        packet.setComponent(response);
+
+        JsonObject rewritten = response.deepCopy();
+        rewritten.add("description", GSON.serializeToTree(description));
+        if (rewritten.toString().length() > StatusDescriptionLimiter.MAX_STATUS_DESCRIPTION_CHARS) {
+            rewritten.add("description", GSON.serializeToTree(SAFE_STATUS_FALLBACK));
+            if (rewritten.toString().length() > StatusDescriptionLimiter.MAX_STATUS_DESCRIPTION_CHARS) {
+                return;
+            }
+        }
+        packet.setComponent(rewritten);
     }
 }

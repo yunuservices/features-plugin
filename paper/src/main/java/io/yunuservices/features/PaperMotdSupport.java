@@ -10,6 +10,7 @@ import io.yunuservices.features.core.mineskin.MineSkinUploadService;
 import io.yunuservices.features.core.model.HeadSpriteImage;
 import io.yunuservices.features.core.model.PlayerHeadSymbol;
 import io.yunuservices.features.core.protocol.MotdProtocolSupport;
+import io.yunuservices.features.core.protocol.StatusDescriptionLimiter;
 import io.yunuservices.features.core.render.HeadSpriteRenderer;
 import io.yunuservices.features.core.render.TexturePropertyNormalizer;
 import net.kyori.adventure.text.Component;
@@ -45,6 +46,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 final class PaperMotdSupport implements Listener {
+    private static final Component SAFE_STATUS_FALLBACK = Component.text("Welcome to the server");
+
     private final PaperFeaturesPlugin plugin;
     private final YamlStore yamlStore;
 
@@ -169,7 +172,7 @@ final class PaperMotdSupport implements Listener {
         if (motd == null) {
             return null;
         }
-        return motd.resolveDescription(supportsSpriteMotd);
+        return motd.resolveDescription(supportsSpriteMotd, SAFE_STATUS_FALLBACK);
     }
 
     private Logger logger() {
@@ -1244,17 +1247,14 @@ final class PaperMotdSupport implements Listener {
     }
 
     private record RuntimeMotd(String id, boolean spriteBased, Component spriteDescription, Component fallbackDescription) {
-        Component resolveDescription(boolean supportsSpriteMotd) {
-            if (supportsSpriteMotd && spriteBased && spriteDescription != null) {
-                return spriteDescription;
-            }
-            if (fallbackDescription != null) {
-                return fallbackDescription;
-            }
-            if (spriteDescription != null) {
-                return spriteDescription;
-            }
-            return Component.text("Features is loaded.");
+        Component resolveDescription(boolean supportsSpriteMotd, Component defaultDescription) {
+            Component preferred = supportsSpriteMotd && spriteBased && spriteDescription != null
+                ? spriteDescription
+                : (fallbackDescription != null
+                    ? fallbackDescription
+                    : (spriteDescription != null ? spriteDescription : defaultDescription));
+            Component fallback = fallbackDescription != null ? fallbackDescription : defaultDescription;
+            return StatusDescriptionLimiter.chooseSafeDescription(preferred, fallback, defaultDescription);
         }
     }
 }

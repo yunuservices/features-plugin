@@ -5,6 +5,7 @@ plugins {
 dependencies {
     api("net.kyori:adventure-api:4.26.1")
     api("net.kyori:adventure-text-minimessage:4.26.1")
+    implementation("net.kyori:adventure-text-serializer-gson:4.26.1")
     api("com.fasterxml.jackson.core:jackson-databind:2.21.1")
     api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.1")
     api("org.mineskin:java-client-jsoup:${rootProject.extra["mineSkinClientVersion"]}")

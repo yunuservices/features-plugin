@@ -23,6 +23,7 @@ import io.yunuservices.features.core.mineskin.MineSkinUploadService;
 import io.yunuservices.features.core.model.HeadSpriteImage;
 import io.yunuservices.features.core.model.PlayerHeadSymbol;
 import io.yunuservices.features.core.protocol.MotdProtocolSupport;
+import io.yunuservices.features.core.protocol.StatusDescriptionLimiter;
 import io.yunuservices.features.core.render.HeadSpriteRenderer;
 import io.yunuservices.features.core.render.TexturePropertyNormalizer;
 import net.kyori.adventure.text.Component;
@@ -66,6 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 )
 public final class VelocityFeaturesPlugin {
     private static final String RELOAD_PERMISSION = "features.admin";
+    private static final Component SAFE_STATUS_FALLBACK = Component.text("Welcome to the network");
 
     private final ProxyServer server;
     private final Logger logger;
@@ -142,7 +144,7 @@ public final class VelocityFeaturesPlugin {
         }
 
         ServerPing.Builder pingBuilder = event.getPing().asBuilder()
-            .description(motd.resolveDescription(supportsSpriteMotd));
+            .description(motd.resolveDescription(supportsSpriteMotd, SAFE_STATUS_FALLBACK));
 
         event.setPing(pingBuilder.build());
     }
@@ -1399,17 +1401,14 @@ public final class VelocityFeaturesPlugin {
     }
 
     private record RuntimeMotd(String id, boolean spriteBased, Component spriteDescription, Component fallbackDescription) {
-        Component resolveDescription(boolean supportsSpriteMotd) {
-            if (supportsSpriteMotd && spriteBased && spriteDescription != null) {
-                return spriteDescription;
-            }
-            if (fallbackDescription != null) {
-                return fallbackDescription;
-            }
-            if (spriteDescription != null) {
-                return spriteDescription;
-            }
-            return Component.text("Features is loaded.");
+        Component resolveDescription(boolean supportsSpriteMotd, Component defaultDescription) {
+            Component preferred = supportsSpriteMotd && spriteBased && spriteDescription != null
+                ? spriteDescription
+                : (fallbackDescription != null
+                    ? fallbackDescription
+                    : (spriteDescription != null ? spriteDescription : defaultDescription));
+            Component fallback = fallbackDescription != null ? fallbackDescription : defaultDescription;
+            return StatusDescriptionLimiter.chooseSafeDescription(preferred, fallback, defaultDescription);
         }
     }
 
